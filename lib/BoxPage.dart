@@ -28,7 +28,7 @@ class _BoxPageState extends State<BoxPage> {
           for (int i = 0; i < 4; i++)
             new TableRow(
               children: <Text>[
-                for (int j = 0; j < 4; j++) Text(b.i[i][j].toString()),
+                // for (int j = 0; j < 4; j++) Text(b.i[i][j].toString()),
               ],
             )
         ],
