@@ -14,6 +14,8 @@ class AddBoxPage extends StatefulWidget {
 class _AddBoxPageState extends State<AddBoxPage> {
   Box box = new Box();
   Link link = new Link();
+  DatabaseMethods database = new DatabaseMethods();
+  List<String> abcd = ['-', 'a', 'b', 'c', 'd'];
 
   Future<void> confirmBoxDialog() async {
     return showDialog<void>(
@@ -25,18 +27,58 @@ class _AddBoxPageState extends State<AddBoxPage> {
           content: SingleChildScrollView(
             child: Row(
               children: [
-                Table(
-                  children: <TableRow>[
-                    for (int i = 0; i < 4; i++)
-                      new TableRow(
-                        children: <Text>[
-                          for (int j = 0; j < 4; j++)
-                            box.mapRes[i][j] == -1
-                                ? Text('-1')
-                                : Text(box.resOut[box.mapRes[i][j]].toString()),
-                        ],
-                      )
-                  ],
+                Container(
+                  // height: 200,
+                  width: 200,
+                  child: Table(
+                    children: <TableRow>[
+                      for (int h = 0; h < 5; h++)
+                        new TableRow(
+                          children: <Text>[
+                            for (int j = 0; j < 5; j++)
+                              h == 0
+                                  ? j == 0
+                                      ? Text('R')
+                                      : Text(abcd[j])
+                                  : j == 0
+                                      ? Text(abcd[h])
+                                      : h == j ||
+                                              box.res[box.mapRes[h - 1]
+                                                      [j - 1]] ==
+                                                  -1
+                                          ? Text('-')
+                                          : Text(box
+                                              .res[box.mapRes[h - 1][j - 1]]
+                                              .toStringAsFixed(2)),
+                          ],
+                        )
+                    ],
+                  ),
+                ),
+                SizedBox(width: 40),
+                Container(
+                  // height: 200,
+                  width: 200,
+                  child: Table(
+                    children: <TableRow>[
+                      for (int h = 0; h < 5; h++)
+                        new TableRow(
+                          children: <Text>[
+                            for (int j = 0; j < 5; j++)
+                              h == 0
+                                  ? j == 0
+                                      ? Text('I')
+                                      : Text(abcd[j])
+                                  : j == 0
+                                      ? Text(abcd[h])
+                                      : h == j
+                                          ? Text('-')
+                                          : Text(box.i[box.mapI[h - 1][j - 1]]
+                                              .toStringAsFixed(2)),
+                          ],
+                        )
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -49,9 +91,10 @@ class _AddBoxPageState extends State<AddBoxPage> {
               },
             ),
             TextButton(
-              child: Text('Confirm'),
-              onPressed: null,
-            ),
+                child: Text('Confirm'),
+                onPressed: () {
+                  database.addBox(box);
+                }),
           ],
         );
       },
@@ -198,29 +241,28 @@ class _AddBoxPageState extends State<AddBoxPage> {
           Center(
             child: RaisedButton(
               child: Text('Submit'),
-              onPressed: () => {
-                for (int i = 0; i < box.links.length; i++)
-                  {
-                    // if (box.links[i].capController.text == '')
-                    //   box.links[i].capController.text = '0',
-                    // if (box.links[i].indController.text == '')
-                    //   box.links[i].indController.text = '0',
-                    if (box.links[i].resController.text == '')
-                      box.res[i] = -1
-                    else
-                      box.res[i] =
-                          double.parse(box.links[i].resController.text),
-                    // if (box.iControllers[2 * i].text == '')
-                    //   box.i[2 * i] = '0'
-                    // else
-                    //   box.i[2 * i] = box.iControllers[2 * i].text,
-                    // if (box.iControllers[2 * i + 1].text == '')
-                    //   box.i[2 * i + 1] = '0'
-                    // else
-                    //   box.i[2 * i + 1] = box.iControllers[2 * i + 1].text,
-                  },
-                box.calculateR(),
-                confirmBoxDialog(),
+              onPressed: () {
+                for (int i = 0; i < box.links.length; i++) {
+                  // if (box.links[i].capController.text == '')
+                  //   box.links[i].capController.text = '0',
+                  // if (box.links[i].indController.text == '')
+                  //   box.links[i].indController.text = '0',
+                  if (box.links[i].resController.text == '')
+                    box.res[i] = -1;
+                  else
+                    box.res[i] = double.parse(box.links[i].resController.text);
+                  // if (box.iControllers[2 * i].text == '')
+                  //   box.i[2 * i] = '0'
+                  // else
+                  //   box.i[2 * i] = box.iControllers[2 * i].text,
+                  // if (box.iControllers[2 * i + 1].text == '')
+                  //   box.i[2 * i + 1] = '0'
+                  // else
+                  //   box.i[2 * i + 1] = box.iControllers[2 * i + 1].text,
+                }
+                box.calculateR();
+                box.calculateI(5.0);
+                confirmBoxDialog();
                 // DatabaseMethods().addBox(box),
               },
             ),

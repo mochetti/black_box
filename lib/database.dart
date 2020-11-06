@@ -51,25 +51,25 @@ class DatabaseMethods {
     int id = await getQnt();
 
     // Check for diodes
-    bool diode = false;
-    for (Link link in box.links) if (link.diode != 0) diode = true;
+    // bool diode = false;
+    // for (Link link in box.links) if (link.diode != 0) diode = true;
 
     // Check for AC elements
-    bool ac = false;
-    for (Link link in box.links)
-      if (link.capController.text != '0' || link.indController.text != '0')
-        ac = true;
+    // bool ac = false;
+    // for (Link link in box.links)
+    //   if (link.capController.text != '0' || link.indController.text != '0')
+    //     ac = true;
 
     // Create box document
     await FirebaseFirestore.instance
         .collection('boxes')
         .doc(id.toString())
         .set({
-      'diode': diode,
-      'ac': ac,
+      'diode': box.diode,
+      'ac': box.ac,
       'i': box.i,
     }).catchError((e) {
-      print(e);
+      print('error addBox: $e');
     });
 
     // Add each link

@@ -1,5 +1,3 @@
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 
 class Box {
@@ -8,7 +6,7 @@ class Box {
       false; // Indicates if there are AC elements (ie. inductors, capacitors)
   List<Link> links = [];
   // ab, ba, ac, ca, ad, da, bc, cb, bd, db, cd, dc
-  List<double> i = [];
+  List<double> i = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   List<double> resOut = [-1, -1, -1, -1, -1, -1];
 
   List<double> res = [-1, -1, -1, -1, -1, -1];
@@ -28,29 +26,37 @@ class Box {
 
   // ab, ba, ac, ca, ad, da, bc, cb, bd, db, cd, dc
   List<TextEditingController> iControllers = [];
-  String mapI(int index) {
-    final List<String> map = [
-      'ab',
-      'ba',
-      'ac',
-      'ca',
-      'ad',
-      'da',
-      'bc',
-      'cb',
-      'bd',
-      'db',
-      'cd',
-      'dc'
-    ];
-    return map[index];
-  }
+
+  // String mapLinkName(int index) {
+  //   final List<String> map = [
+  //     'ab',
+  //     'ba',
+  //     'ac',
+  //     'ca',
+  //     'ad',
+  //     'da',
+  //     'bc',
+  //     'cb',
+  //     'bd',
+  //     'db',
+  //     'cd',
+  //     'dc'
+  //   ];
+  //   return map[index];
+  // }
 
   List<List<int>> mapRes = [
     [-1, 0, 1, 2],
     [0, -1, 3, 4],
     [1, 3, -1, 5],
     [2, 4, 5, -1]
+  ];
+
+  List<List<int>> mapI = [
+    [-1, 0, 2, 4],
+    [1, -1, 6, 8],
+    [3, 7, -1, 10],
+    [5, 9, 11, -1]
   ];
 
   List<List<int>> triangles = [
@@ -104,6 +110,19 @@ class Box {
     }
     print('vertice $a $b not found');
     return null;
+  }
+
+  // Generate i array from resOut values and v voltage
+  calculateI(double v) {
+    // Check if the box is pure resistive
+    if (diode == true || ac == true) return;
+    for (int j = 0; j < resOut.length; j++) {
+      if (resOut[j] != -1) {
+        i[2 * j] = v / resOut[j];
+        i[2 * j + 1] = v / resOut[j];
+      }
+    }
+    print(i);
   }
 
   // Generate resOut array from given inputs
