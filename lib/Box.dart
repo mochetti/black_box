@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
 class Box {
+  int id;
+  String creator = 'anonymous';
+  int pop = 0;
   bool diode = false; // Indicates if there is a diode
   bool ac =
       false; // Indicates if there are AC elements (ie. inductors, capacitors)
@@ -8,7 +11,6 @@ class Box {
   // ab, ba, ac, ca, ad, da, bc, cb, bd, db, cd, dc
   List<double> i = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   List<double> resOut = [-1, -1, -1, -1, -1, -1];
-
   List<double> res = [-1, -1, -1, -1, -1, -1];
 
   // List<List<double>> cap = [
@@ -122,7 +124,7 @@ class Box {
         i[2 * j + 1] = v / resOut[j];
       }
     }
-    print(i);
+    // print(i);
   }
 
   // Generate resOut array from given inputs
@@ -442,15 +444,12 @@ class Link {
   int diode = 0;
   Link();
 
-  String mapLink(int index) {
-    final List<String> map = [
-      'ab',
-      'ac',
-      'ad',
-      'bc',
-      'bd',
-      'cd',
-    ];
-    return map[index];
-  }
+  List<String> mapLink = [
+    'ab',
+    'ac',
+    'ad',
+    'bc',
+    'bd',
+    'cd',
+  ];
 }

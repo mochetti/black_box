@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'Box.dart';
 
 class DatabaseMethods {
-  getBox(int id) async {
+  Future<Box> getBox(int id) async {
     Box box = new Box();
 
     // Get box properties
@@ -16,6 +16,11 @@ class DatabaseMethods {
 
     box.ac = snap.get('ac');
     box.diode = snap.get('diode');
+    box.id = snap.get('id');
+    box.creator = snap.get('creator');
+    box.pop = snap.get('pop');
+    box.i = [];
+    for (int i = 0; i < 12; i++) box.i.add(snap.get('i')[i]);
 
     // Get links
     QuerySnapshot query = await FirebaseFirestore.instance
@@ -35,15 +40,63 @@ class DatabaseMethods {
     //   [2, 4, 5, -1]
     // ];
 
-    // for (int i = 0; i < 4; i++) {
-    //   for (int j = 0; j < 4; j++) {
-    //     box.res[i][j] = query.docs[decode[i][j]].get('res');
-    //     box.cap[i][j] = query.docs[decode[i][j]].get('cap');
-    //     box.ind[i][j] = query.docs[decode[i][j]].get('ind');
-    //   }
-    // }
-
+    for (int i = 0; i < 6; i++) {
+      box.res[i] = query.docs[i].get('res');
+    }
     return box;
+  }
+
+  // Return most popular boxes by 'pop' field
+  getPop() async {
+    List<Box> popBoxes = [];
+    int qnt = await getQnt();
+    // Get ids
+    QuerySnapshot query = await FirebaseFirestore.instance
+        .collection('boxes')
+        .orderBy('pop', descending: true)
+        .limit(5)
+        .get()
+        .catchError((e) {
+      print(e);
+    });
+    // Get boxes
+    if (qnt > 5) qnt = 5;
+    for (int i = 0; i < qnt; i++) {
+      popBoxes.add(await getBox(int.parse(query.docs[i].id)));
+    }
+    return popBoxes;
+  }
+
+  // Return last added boxes as array
+  getLast() async {
+    // Get last box id
+    int qnt = await getQnt();
+    List<Box> lastBoxes = [];
+    // Get boxes
+    for (int i = 0; i < qnt; i++) {
+      lastBoxes.add(await getBox(qnt - i - 1));
+    }
+    return lastBoxes;
+  }
+
+  // Add 1 in pop field
+  addPop(int id) async {
+    // Get current pop
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('boxes')
+        .doc(id.toString())
+        .get()
+        .catchError((e) {
+      print(e);
+    });
+    await FirebaseFirestore.instance
+        .collection('boxes')
+        .doc(id.toString())
+        .update({
+      'pop': doc.get('pop') + 1,
+    }).catchError((e) {
+      print(e);
+    });
   }
 
   addBox(Box box) async {
@@ -68,6 +121,9 @@ class DatabaseMethods {
       'diode': box.diode,
       'ac': box.ac,
       'i': box.i,
+      'id': id,
+      'creator': box.creator,
+      'pop': 0,
     }).catchError((e) {
       print('error addBox: $e');
     });
@@ -75,19 +131,24 @@ class DatabaseMethods {
     // Add each link
     for (int i = 0; i < box.links.length; i++)
       await setLink(
-          id,
-          i,
-          box.links[i].diode,
-          double.parse(box.links[i].capController.text),
-          double.parse(box.links[i].indController.text),
-          double.parse(box.links[i].resController.text));
+          doc: id,
+          link: i,
+          diode: box.links[i].diode,
+          // double.parse(box.links[i].capController.text),
+          // double.parse(box.links[i].indController.text),
+          res: double.parse(box.links[i].resController.text));
 
     // Increase boxes length by one
     setQnt(id + 1);
   }
 
   setLink(
-      int doc, int link, int diode, double cap, double ind, double res) async {
+      {int doc,
+      int link,
+      int diode,
+      double cap,
+      double ind,
+      double res}) async {
     final List<String> map = [
       'ab',
       'ac',
@@ -103,11 +164,11 @@ class DatabaseMethods {
         .doc(map[link])
         .set({
       'diode': diode,
-      'cap': cap,
-      'ind': ind,
+      // 'cap': cap,
+      // 'ind': ind,
       'res': res,
     }).catchError((e) {
-      print(e);
+      print('error set link: $e');
     });
   }
 
