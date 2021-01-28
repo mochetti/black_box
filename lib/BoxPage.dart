@@ -48,6 +48,9 @@ class _BoxPageState extends State<BoxPage> {
             ),
             body: Column(
               children: [
+                Center(
+                  child: Text('Voltage = 5V'),
+                ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
